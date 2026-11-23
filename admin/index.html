@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <title>Dashboard | MedicoHues</title>
-<link rel="icon" href="../favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="/admin/admin.css">
 </head>
 <body>
 
 <!-- AUTH -->
-<section class="auth" id="auth" hidden>
+<section class="auth" id="auth">
   <form class="auth-card" id="auth-form">
-    <img src="../assets/logo-horizontal.png" alt="MedicoHues" class="auth-logo">
+    <img src="/assets/logo-horizontal.png" alt="MedicoHues" class="auth-logo">
     <h1 id="auth-title">Sign in to your dashboard</h1>
     <p class="muted" id="auth-sub">Manage enquiries, products, articles and more.</p>
     <label>Email<input type="email" name="email" required autocomplete="email"></label>
@@ -35,10 +35,10 @@
 <!-- APP -->
 <div class="app" id="app" hidden>
   <aside class="side" id="side">
-    <a class="side-logo" href="#overview"><img src="../assets/logo-horizontal.png" alt="MedicoHues"></a>
+    <a class="side-logo" href="#overview"><img src="/assets/logo-horizontal.png" alt="MedicoHues"></a>
     <nav id="side-nav"></nav>
     <div class="side-foot">
-      <a href="../" target="_blank" class="side-link">↗ View website</a>
+      <a href="/" target="_blank" class="side-link">↗ View website</a>
       <button class="side-link" id="logout">Sign out</button>
     </div>
   </aside>
@@ -60,7 +60,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<script src="../supa.js"></script>
-<script src="admin.js"></script>
+<script src="/supa.js"></script>
+<script src="/admin/admin.js"></script>
 </body>
 </html>

@@ -44,7 +44,7 @@ const TYPES = {
       { k: 'published', l: 'Published (visible on website)', t: 'bool', def: false }
     ],
     beforeSave: r => { if (!r.slug) r.slug = slugify(r.title) + '-' + Math.random().toString(36).slice(2, 5); },
-    link: r => `../article.html?slug=${encodeURIComponent(r.slug)}`
+    link: r => `/article.html?slug=${encodeURIComponent(r.slug)}`
   },
   partners: {
     label: 'Partners', icon: '◇', key: 'id', order: 'sort', singular: 'partner',
