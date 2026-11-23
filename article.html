@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article | MedicoHues</title>
+<meta name="description" content="MedicoHues product portfolio for Gastroenterology, Pulmonology and Urology.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="page">
+
+<header class="nav solid" id="nav">
+  <div class="wrap nav-inner">
+    <a href="index.html" class="brand" aria-label="MedicoHues home"><img src="assets/logo-horizontal.png" alt="MedicoHues — Guide Your Hue in World"></a>
+    <nav class="links" id="links">
+      <a href="index.html#top">Home</a>
+      <div class="dd"><button class="dd-btn">About us</button>
+        <div class="dd-menu">
+          <a href="index.html#about">Company</a>
+          <a href="index.html#team">Our team</a>
+          <a href="index.html#customers">Customers</a>
+          <a href="index.html#feedback">Feedback &amp; installations</a>
+        </div></div>
+      <div class="dd"><button class="dd-btn">Specialities</button>
+        <div class="dd-menu wide" id="spec-menu"></div></div>
+      <a href="index.html#partners">Partners</a>
+      <a href="index.html#knowledge">Knowledge</a>
+      <a href="#" class="btn btn-sm" data-enquire>Enquire</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="Open menu"><span></span><span></span></button>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow"><a href="index.html#knowledge">Knowledge sharing</a> · <span id="a-date"></span></p>
+      <h1 id="a-title">Loading…</h1>
+      <p class="lead" id="a-summary"></p>
+    </div>
+  </section>
+  <section class="section">
+    <article class="wrap article" id="a-body"></article>
+    <div class="wrap article-cta"><a href="#" class="btn" data-enquire>Talk to us about this</a></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap foot-inner">
+    <img src="assets/logo-horizontal.png" alt="MedicoHues">
+    <p>© <span id="yr"></span> MedicoHues LLP. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data.js"></script>
+<script src="supa.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<script src="script.js"></script>
+<script>
+(async () => {
+  const slug = new URLSearchParams(location.search).get('slug');
+  const t = document.getElementById('a-title');
+  if (!slug || !window.sb) { t.textContent = 'Article not found'; return; }
+  const { data } = await sb.from('articles').select('*').eq('slug', slug).eq('published', true).maybeSingle();
+  if (!data) { t.textContent = 'Article not found'; return; }
+  document.title = data.title + ' | MedicoHues';
+  t.textContent = data.title;
+  document.getElementById('a-summary').textContent = data.summary || '';
+  document.getElementById('a-date').textContent = data.published_at ? new Date(data.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  document.getElementById('a-body').innerHTML = (data.cover ? `<img class="a-cover" src="${data.cover.replace(/"/g, '')}" alt="">` : '') + DOMPurify.sanitize(marked.parse(data.body || ''));
+})();
+</script>
+</body>
+</html>

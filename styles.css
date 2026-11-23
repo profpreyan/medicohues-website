@@ -213,3 +213,17 @@ img{max-width:100%;display:block}
 .thumb img:not(.ph),.d-img img:not(.ph){padding:.8rem}
 .rep{position:absolute;left:.7rem;bottom:.7rem;font:600 .68rem Montserrat,sans-serif;letter-spacing:.04em;background:rgba(6,20,43,.78);color:#fff;padding:.3rem .6rem;border-radius:6px}
 .drawer-panel .cta{flex-wrap:wrap}
+
+/* articles */
+.post .cover{width:calc(100% + 4rem);margin:-2rem -2rem 1.2rem;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r) var(--r) 0 0;max-width:none}
+.post{overflow:hidden}
+.page-hero .eyebrow a{color:inherit}
+.article{max-width:760px;font-size:1.08rem}
+.article .a-cover{border-radius:var(--r);margin-bottom:2rem;width:100%}
+.article h2{font-size:1.7rem;margin:2.2rem 0 .8rem}.article h3{margin:1.8rem 0 .6rem}
+.article p,.article ul,.article ol{margin-bottom:1.1rem;color:#33425a}
+.article ul,.article ol{padding-left:1.4rem}
+.article img{border-radius:12px;margin:1.5rem 0}
+.article a{color:var(--blue);text-decoration:underline}
+.article blockquote{border-left:3px solid var(--cyan);padding:.4rem 1.2rem;color:var(--muted);margin:1.5rem 0}
+.article-cta{max-width:760px;margin-top:2.5rem}

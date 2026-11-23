@@ -1,4 +1,5 @@
-const D = window.MH;
+(async () => {
+const D = window.loadContent ? await window.loadContent() : window.MH;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -32,6 +33,15 @@ const countIO = new IntersectionObserver(es => es.forEach(e => {
 }), { threshold: 0.5 });
 document.querySelectorAll('[data-count]').forEach(c => countIO.observe(c));
 
+/* ---------- home: partners, customers ---------- */
+if ($('#partners-grid') && D.live) {
+  const main = D.partners.filter(p => !p.sub_distributor), sub = D.partners.filter(p => p.sub_distributor);
+  $('#partners-grid').innerHTML = main.map(p => `<article class="partner reveal"><div class="p-top"><h3>${esc(p.name)}</h3>${p.chip ? `<span class="chip">${esc(p.chip)}</span>` : ''}</div><p>${esc(p.description)}</p>${p.origin ? `<span class="origin">${esc(p.origin)}</span>` : ''}</article>`).join('');
+  $('#subdist').innerHTML = sub.map(p => `<div><p class="eyebrow">Sub-distributor · Gujarat</p><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p></div>`).join('');
+  $('#subdist').style.display = sub.length ? '' : 'none';
+  $('#customers-list').innerHTML = D.customers.map(c => `<li>${esc(c.name)}</li>`).join('') + '<li class="more">…and many more</li>';
+}
+
 /* ---------- home: feedback, installations, knowledge ---------- */
 const empty = (title, text) => `<div class="empty reveal"><h3>${title}</h3><p>${text}</p></div>`;
 if ($('#testimonials')) {
@@ -42,7 +52,7 @@ if ($('#testimonials')) {
     ? D.installations.map(i => `<article class="inst reveal">${i.image ? `<img src="${esc(i.image)}" alt="">` : ''}<span class="date">${esc(i.date)}</span><h3>${esc(i.title)}</h3><p>${esc(i.place)}</p></article>`).join('')
     : empty('Installation updates coming soon', 'Our latest equipment installations across Gujarat will appear here.');
   $('#posts').innerHTML = D.posts.length
-    ? D.posts.map(p => `<a class="post reveal" href="${esc(p.url) || '#'}"><span class="date">${esc(p.date)}</span><h3>${esc(p.title)}</h3><p>${esc(p.summary)}</p><span class="more-link">Read more →</span></a>`).join('')
+    ? D.posts.map(p => `<a class="post reveal" href="${esc(p.url) || '#'}">${p.cover ? `<img class="cover" src="${esc(p.cover)}" alt="" loading="lazy">` : ''}<span class="date">${esc(p.date)}</span><h3>${esc(p.title)}</h3><p>${esc(p.summary)}</p><span class="more-link">Read more →</span></a>`).join('')
     : empty('Articles coming soon', 'Clinical insights, product updates and educational resources will be published here.');
 }
 
@@ -92,6 +102,7 @@ if (grid) {
   const drawer = $('#drawer');
   const open = id => {
     const p = D.products.find(x => x.id === id); if (!p) return;
+    window.mhTrack && mhTrack('product:' + p.id);
     $('#drawer-body').innerHTML = `
       <div class="d-img">${img(p)}</div>
       <span class="chip">${D.specialities[p.s].name} · ${D.categories[p.c]}</span>
@@ -148,8 +159,12 @@ form.addEventListener('submit', async e => {
   data.page = location.href; data.submittedAt = new Date().toISOString();
   const btn = form.querySelector('button[type=submit]'); btn.disabled = true; msg.textContent = 'Sending…';
   try {
-    if (!D.SHEET_ENDPOINT) throw new Error('no endpoint');
-    await fetch(D.SHEET_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+    if (!window.sb) throw new Error('offline');
+    const id = crypto.randomUUID();
+    const row = { id, name: data.name, organisation: data.organisation || null, phone: data.phone, email: data.email || null, speciality: data.speciality || null, product: data.product || null, message: data.message || null, page: data.page };
+    const { error } = await sb.from('enquiries').insert(row);
+    if (error) throw error;
+    fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }).catch(() => {});
     msg.textContent = 'Thank you! We will get back to you shortly.'; form.reset();
   } catch {
     const body = Object.entries(data).map(([k, v]) => `${k}: ${v}`).join('\n');
@@ -160,3 +175,4 @@ form.addEventListener('submit', async e => {
 
 observe();
 $('#yr').textContent = new Date().getFullYear();
+})();

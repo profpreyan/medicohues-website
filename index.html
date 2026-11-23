@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedicoHues | Endoscopy Devices for Gastroenterology, Pulmonology &amp; Urology</title>
 <meta name="description" content="MedicoHues LLP, Ahmedabad: authorised distributor of advanced endoscopy devices for Gastroenterology, Pulmonology and Urology across Gujarat.">
-<link rel="icon" type="image/png" href="assets/logo-mark.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -115,7 +117,7 @@
         <h2>Authorised distributor for global leaders</h2>
         <p class="sub">Our market reach and clinical expertise have earned us partnerships with best-in-industry manufacturers to build a complete Gastroenterology and Pulmonology portfolio.</p>
       </div>
-      <div class="partners">
+      <div class="partners" id="partners-grid">
         <article class="partner reveal">
           <div class="p-top"><h3>Taewoong Medical</h3><span class="chip">Gastro</span></div>
           <p>Known for the best quality nitinol SEMS with the wide Niti-S portfolio — the first preference of gastroenterologists around the world.</p>
@@ -147,7 +149,7 @@
           <span class="origin">Japan</span>
         </article>
       </div>
-      <div class="sub-dist reveal">
+      <div class="sub-dist reveal" id="subdist">
         <div>
           <p class="eyebrow">Sub-distributor · Gujarat</p>
           <h3>STERIS Healthcare</h3>
@@ -184,7 +186,7 @@
         <h2>Trusted by leading hospitals in Gujarat</h2>
         <p class="sub">Our key customers are a true reference of our service and support, and have contributed greatly to the growth of MedicoHues.</p>
       </div>
-      <ul class="customers reveal">
+      <ul class="customers reveal" id="customers-list">
         <li>Zydus Group of Hospitals</li>
         <li>Marengo Asia Hospital</li>
         <li>SIDS Hospital</li>
@@ -256,7 +258,9 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="data.js"></script>
+<script src="supa.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
