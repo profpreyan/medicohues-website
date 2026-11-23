@@ -128,7 +128,8 @@ $('#auth-form').onsubmit = async e => {
   if (r.error) return authMsg(r.error.message);
   if (mode === 'signup') return authMsg('Account created. Check your inbox and click the confirmation link, then sign in here.', true);
   if (mode === 'reset') return authMsg('Reset link sent. Check your inbox.', true);
-  if (mode === 'newpw') { toast('Password updated'); start(); }
+  if (mode === 'newpw') toast('Password updated');
+  authMsg(''); f.reset(); start();
 };
 
 sb.auth.onAuthStateChange((ev, s) => {
