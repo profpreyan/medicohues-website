@@ -174,6 +174,7 @@ function route() {
   $('#page-title').textContent = NAV.find(n => n[0] === page)[1];
   $('#top-actions').innerHTML = '';
   charts.forEach(c => c.destroy()); charts = [];
+  if (!$('#panel-bg').hidden) { $('#panel-bg').classList.remove('show'); $('#panel-bg').hidden = true; }
   $('#content').innerHTML = '<div class="loading">Loading…</div>';
   if (page === 'overview') return overview();
   if (page === 'enquiries') return enquiries(id);

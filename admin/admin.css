@@ -134,8 +134,8 @@ textarea.md{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88rem}
 .chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
 .chipx{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:.35rem .8rem;font-size:.88rem}
 .chipx button{border:0;background:none;color:var(--red);cursor:pointer;font-size:1rem;margin-left:.2rem}
-.toast{position:fixed;bottom:1.5rem;left:50%;transform:translate(-50%,120%);background:var(--ink);color:#fff;padding:.75rem 1.3rem;border-radius:999px;font-weight:500;font-size:.9rem;z-index:100;transition:transform .25s;pointer-events:none}
-.toast.show{transform:translate(-50%,0)}.toast.bad{background:var(--red)}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translate(-50%,120%);background:var(--ink);color:#fff;padding:.75rem 1.3rem;border-radius:999px;font-weight:500;font-size:.9rem;z-index:100;transition:transform .25s,opacity .25s;pointer-events:none;opacity:0}
+.toast.show{transform:translate(-50%,0);opacity:1}.toast.bad{background:var(--red)}
 
 @media (max-width:1100px){.kpis{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:1fr 1fr}}
 @media (max-width:800px){
