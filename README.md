@@ -1,2 +1,5 @@
-# medicohues-website
-Portfolio website for MedicoHues LLP - Guide Your Hue in World. Medical devices for Gastroenterology, Pulmonology, Urology and Orthopaedics.
+# MedicoHues Portfolio Website
+
+Portfolio site for MedicoHues LLP.
+
+Deployed via Vercel.
