@@ -26,7 +26,7 @@ img{max-width:100%;display:block}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;height:76px}
 .brand img{height:40px;width:auto}
 .links{display:flex;align-items:center;gap:2rem;color:#dbe6f5;font:500 .92rem Montserrat,sans-serif}
-.links a:not(.btn):hover{color:#fff}
+.links>a:not(.btn):hover,.dd-btn:hover{color:#fff}
 .links .btn{color:#fff}
 .burger{display:none;background:none;border:0;width:40px;height:40px;cursor:pointer}
 .burger span{display:block;height:2px;background:#fff;margin:7px 8px;transition:.3s}
@@ -139,7 +139,7 @@ img{max-width:100%;display:block}
 .dd-menu::before{content:"";position:absolute;inset:-16px 0 auto;height:16px}
 .dd:hover .dd-menu,.dd.open .dd-menu{opacity:1;visibility:visible;transform:translate(-50%,0)}
 .dd-menu a{padding:.55rem .8rem;border-radius:8px;font-size:.88rem;color:var(--muted)}
-.dd-menu a:hover{background:var(--soft);color:var(--blue)}
+.links .dd-menu a:hover{background:#e8f4fd;color:var(--blue)}
 .dd-menu.wide{flex-direction:row;gap:.5rem;min-width:640px}
 .dd-col{flex:1;display:flex;flex-direction:column}
 .dd-menu .dd-title{color:var(--ink);font-weight:700}
@@ -206,6 +206,10 @@ img{max-width:100%;display:block}
   .dd-menu,.dd-menu.wide{position:static;transform:none;opacity:1;visibility:visible;display:none;min-width:0;box-shadow:none;background:rgba(255,255,255,.05);margin-top:.6rem;flex-direction:column}
   .dd.open .dd-menu{display:flex;transform:none}
   .dd-menu a{color:#b9c8de}.dd-menu .dd-title{color:#fff}
-  .dd-menu a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .links .dd-menu a:hover{background:rgba(255,255,255,.08);color:#fff}
 }
 @media (max-width:620px){.fields{grid-template-columns:1fr}}
+.thumb,.d-img{position:relative;background:#fff;border-bottom:1px solid var(--line)}
+.thumb img:not(.ph),.d-img img:not(.ph){padding:.8rem}
+.rep{position:absolute;left:.7rem;bottom:.7rem;font:600 .68rem Montserrat,sans-serif;letter-spacing:.04em;background:rgba(6,20,43,.78);color:#fff;padding:.3rem .6rem;border-radius:6px}
+.drawer-panel .cta{flex-wrap:wrap}

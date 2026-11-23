@@ -47,6 +47,9 @@ if ($('#testimonials')) {
 }
 
 /* ---------- products page ---------- */
+const img = p => p.image
+  ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.className='ph';this.src='assets/logo-mark.png'">${p.representative ? '<span class="rep">Representative Photo</span>' : ''}`
+  : `<img class="ph" src="assets/logo-mark.png" alt="">`;
 const grid = $('#product-grid');
 if (grid) {
   const q = new URLSearchParams(location.search);
@@ -66,7 +69,7 @@ if (grid) {
     const list = D.products.filter(p => p.s === spec && (cat === 'all' || p.c === cat));
     grid.innerHTML = list.map(p => `
       <article class="product reveal" data-id="${p.id}" tabindex="0">
-        <div class="thumb">${p.image ? `<img src="${esc(p.image)}" alt="${esc(p.name)}">` : `<img class="ph" src="assets/logo-mark.png" alt="">`}</div>
+        <div class="thumb">${img(p)}</div>
         <div class="p-body">
           <span class="chip">${D.categories[p.c]}</span>
           <h3>${esc(p.name)}</h3>
@@ -90,13 +93,14 @@ if (grid) {
   const open = id => {
     const p = D.products.find(x => x.id === id); if (!p) return;
     $('#drawer-body').innerHTML = `
-      <div class="d-img">${p.image ? `<img src="${esc(p.image)}" alt="${esc(p.name)}">` : `<img class="ph" src="assets/logo-mark.png" alt="">`}</div>
+      <div class="d-img">${img(p)}</div>
       <span class="chip">${D.specialities[p.s].name} · ${D.categories[p.c]}</span>
       <h2>${esc(p.name)}</h2>
       <p class="brandname">${esc(p.brand)}</p>
       <p>${esc(p.brief)}</p><p>${esc(p.details)}</p>
       <div class="cta">
-        ${p.brochure ? `<a class="btn" href="${esc(p.brochure)}" download>Download brochure</a>` : ''}
+        ${p.brochure ? `<a class="btn" href="${esc(p.brochure)}" target="_blank" rel="noopener">Download brochure</a>` : ''}
+        ${p.source ? `<a class="btn btn-ghost" href="${esc(p.source)}" target="_blank" rel="noopener">Manufacturer page ↗</a>` : ''}
         <a class="btn ${p.brochure ? 'btn-ghost' : ''}" href="#" data-enquire="${esc(p.name)}">${p.brochure ? 'Enquire' : 'Request brochure / enquire'}</a>
       </div>`;
     drawer.classList.add('show'); drawer.setAttribute('aria-hidden', 'false');
