@@ -1,11 +1,11 @@
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
-const SUPA_URL = process.env.SUPABASE_URL || 'https://znzensjmhxytvgbxcrpc.supabase.co';
-const SUPA_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_cgGMmpsbvgjW4wt9ksXLmw_hQ3DYOU0';
+const SUPA_URL = process.env.SUPABASE_URL || 'https://oyehwvvpsdpkhpbtoylb.supabase.co';
+const SUPA_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_HEY-CuAb3JqyaXmWlzrakg_3CfjZAqD';
 
 const client = token => createClient(SUPA_URL, SUPA_KEY, {
-  auth: { persistSession: false },
+  auth: { persistSession: false }, db: { schema: 'medicohues' },
   global: token ? { headers: { Authorization: `Bearer ${token}` } } : {}
 });
 

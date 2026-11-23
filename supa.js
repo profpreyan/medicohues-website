@@ -1,8 +1,8 @@
 /* Supabase connection + page-view tracking + live content loader.
    The publishable key is safe to expose; all access is governed by row-level security. */
-window.SUPA_URL = 'https://znzensjmhxytvgbxcrpc.supabase.co';
-window.SUPA_KEY = 'sb_publishable_cgGMmpsbvgjW4wt9ksXLmw_hQ3DYOU0';
-window.sb = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+window.SUPA_URL = 'https://oyehwvvpsdpkhpbtoylb.supabase.co';
+window.SUPA_KEY = 'sb_publishable_HEY-CuAb3JqyaXmWlzrakg_3CfjZAqD';
+window.sb = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY, { db: { schema: 'medicohues' } }) : null;
 
 (function track() {
   if (!window.sb || /\/admin/.test(location.pathname)) return;

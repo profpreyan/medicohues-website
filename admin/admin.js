@@ -414,9 +414,9 @@ function fieldHTML(f, v) {
 async function upload(file) {
   const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
   const path = `${new Date().getFullYear()}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await sb.storage.from('media').upload(path, file, { cacheControl: '31536000', contentType: file.type });
+  const { error } = await sb.storage.from('medicohues-media').upload(path, file, { cacheControl: '31536000', contentType: file.type });
   if (error) throw error;
-  return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+  return sb.storage.from('medicohues-media').getPublicUrl(path).data.publicUrl;
 }
 
 function edit(type, row, data, rerender) {
