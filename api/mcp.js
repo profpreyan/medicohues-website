@@ -9,6 +9,26 @@ const BUCKET = "medicohues-media";
 
 const TYPES = ["products", "articles", "partners", "customers", "testimonials", "installations", "enquiries"];
 
+
+// Text columns that exist on each table (products has name/brand, not title; articles have title, not name).
+const SEARCH_COLUMNS = {
+  products: ["name", "brand", "brief"],
+  articles: ["title", "summary"],
+  partners: ["name", "chip", "description"],
+  customers: ["name"],
+  testimonials: ["name", "place", "quote"],
+  installations: ["title", "place"],
+  enquiries: ["name", "organisation", "product", "email", "message"],
+};
+
+function searchFilter(type, search) {
+  const term = String(search || "").replace(/[%_,*()\\]/g, " ").replace(/\s+/g, " ").trim();
+  if (!term) return null;
+  const cols = SEARCH_COLUMNS[type] || ["name"];
+  return cols.map((col) => `${col}.ilike.%${term}%`).join(",");
+}
+
+
 function getSb(token) {
   return createClient(SUPA_URL, SUPA_ANON, {
     global: token ? { headers: { Authorization: `Bearer ${token}` } } : {},
@@ -85,7 +105,10 @@ const handler = createMcpHandler(
         const sb = getSb(token);
         let q = sb.from(type).select("*").limit(limit || 50);
         if (published !== undefined) q = q.eq("published", published);
-        if (search) q = q.or(`name.ilike.%${search}%,title.ilike.%${search}%`);
+        if (search) {
+          const filter = searchFilter(type, search);
+          if (filter) q = q.or(filter);
+        }
         const { data, error } = await q;
         if (error) throw new Error(error.message);
         return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
