@@ -1,0 +1,7 @@
+{
+  "resource": "https://medicohues-website.vercel.app/api/mcp",
+  "authorization_servers": ["https://oyehwvvpsdpkhpbtoylb.supabase.co/auth/v1"],
+  "scopes_supported": ["openid", "email", "profile"],
+  "bearer_methods_supported": ["header"],
+  "resource_name": "MedicoHues Admin MCP"
+}
