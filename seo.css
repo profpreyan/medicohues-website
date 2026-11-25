@@ -1,0 +1,32 @@
+/* Styles for server-rendered SEO pages (products, articles, locations) and footer links */
+.foot-links{display:flex;flex-wrap:wrap;gap:.4rem 1rem;align-items:center}
+.foot-links a{color:#b9c8de}.foot-links a:hover{color:#fff}
+.foot-links span{color:#5d6f8a}
+.mh-grid-head{grid-column:1/-1;font-size:clamp(1.4rem,2.6vw,1.9rem);margin:1rem 0 .5rem}
+.products .mh-grid-head:not(:first-child){margin-top:2.5rem}
+.product h3 a{color:inherit}
+.mh-note{color:var(--muted);margin:1.5rem 0}
+.mh-note a,.mh-supply a,.mh-wide a:not(.btn),.page-hero .lead a{color:var(--blue);text-decoration:underline}
+.page-hero .lead a{color:#9fd3ff}
+.mh-product{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:3rem;align-items:start}
+.mh-product-media{position:sticky;top:100px}
+.mh-product-media .d-img{border:1px solid var(--line);border-radius:var(--r)}
+.mh-product-info.article{max-width:none}
+.mh-product-info h3{margin:1.6rem 0 .6rem}
+.mh-specs{width:100%;border-collapse:collapse;margin:0 0 1.4rem;font-size:.95rem}
+.mh-specs th,.mh-specs td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+.mh-specs th{width:42%;font-weight:600;color:var(--ink);background:var(--soft)}
+.mh-supply{background:var(--soft);border-radius:12px;padding:1rem 1.2rem}
+.mh-wide{max-width:900px}
+.mh-city-list{columns:2}
+.mh-faq details{border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;margin-bottom:.8rem;background:#fff}
+.mh-faq summary{cursor:pointer;list-style:none}
+.mh-faq summary h3{display:inline;font-size:1.05rem;margin:0}
+.mh-faq details p{margin:.6rem 0 0}
+.mh-hero-cta{padding-bottom:2.5rem}
+.mh-cta-band{background:var(--soft)}
+.mh-cta-band .sub{color:var(--muted);margin:.8rem 0 1.5rem}
+.mh-post-title{font-size:1.2rem;margin:.4rem 0}
+.mh-all-link{margin-top:1.5rem}
+.section.alt{background:var(--soft)}
+@media (max-width:860px){.mh-product{grid-template-columns:1fr}.mh-product-media{position:static}.mh-city-list{columns:1}}
