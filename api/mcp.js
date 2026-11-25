@@ -19,11 +19,23 @@ function getSb(token) {
 async function verifyToken(req, bearerToken) {
   if (!bearerToken) return undefined;
   try {
-    const sb = createClient(SUPA_URL, SUPA_ANON);
+    const sb = createClient(SUPA_URL, SUPA_ANON, {
+      db: { schema: "medicohues" },
+    });
     const { data: { user }, error } = await sb.auth.getUser(bearerToken);
-    if (error || !user) return undefined;
-    const { data: isAdmin } = await sb.rpc("claim_admin", {}, { headers: { Authorization: `Bearer ${bearerToken}` } });
-    if (!isAdmin) return undefined;
+    if (error || !user) {
+      console.error("MCP auth getUser failed:", error?.message || "no user");
+      return undefined;
+    }
+    const { data: isAdmin, error: rpcError } = await sb.rpc("claim_admin", {}, { headers: { Authorization: `Bearer ${bearerToken}` } });
+    if (rpcError) {
+      console.error("MCP auth claim_admin rpc failed:", rpcError.message);
+      return undefined;
+    }
+    if (!isAdmin) {
+      console.error("MCP auth claim_admin denied for", user.email);
+      return undefined;
+    }
     return {
       token: bearerToken,
       scopes: ["openid", "email", "profile"],
