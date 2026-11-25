@@ -18,7 +18,7 @@ links.addEventListener('click', e => {
 // Specialities dropdown: speciality → categories
 $('#spec-menu').innerHTML = Object.entries(D.specialities).map(([k, s]) => {
   const cats = Object.keys(D.categories).filter(c => D.products.some(p => p.s === k && p.c === c));
-  return `<div class="dd-col"><a class="dd-title" href="products.html?s=${k}">${s.name}</a>${cats.map(c => `<a href="products.html?s=${k}&c=${c}">${D.categories[c]}</a>`).join('')}</div>`;
+  return `<div class="dd-col"><a class="dd-title" href="/products?s=${k}">${s.name}</a>${cats.map(c => `<a href="/products?s=${k}&c=${c}">${D.categories[c]}</a>`).join('')}</div>`;
 }).join('');
 
 /* ---------- reveal + counters ---------- */
@@ -58,8 +58,8 @@ if ($('#testimonials')) {
 
 /* ---------- products page ---------- */
 const img = p => p.image
-  ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.className='ph';this.src='assets/logo-mark.png'">${p.representative ? '<span class="rep">Representative Photo</span>' : ''}`
-  : `<img class="ph" src="assets/logo-mark.png" alt="">`;
+  ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.className='ph';this.src='/assets/logo-mark.png'">${p.representative ? '<span class="rep">Representative Photo</span>' : ''}`
+  : `<img class="ph" src="/assets/logo-mark.png" alt="">`;
 const grid = $('#product-grid');
 if (grid) {
   const q = new URLSearchParams(location.search);
@@ -113,10 +113,11 @@ if (grid) {
         ${p.brochure ? `<a class="btn" href="${esc(p.brochure)}" target="_blank" rel="noopener">Download brochure</a>` : ''}
         ${p.source ? `<a class="btn btn-ghost" href="${esc(p.source)}" target="_blank" rel="noopener">Manufacturer page ↗</a>` : ''}
         <a class="btn ${p.brochure ? 'btn-ghost' : ''}" href="#" data-enquire="${esc(p.name)}">${p.brochure ? 'Enquire' : 'Request brochure / enquire'}</a>
+        <a class="btn btn-ghost" href="/products/${encodeURIComponent(p.id)}">View full product page →</a>
       </div>`;
     drawer.classList.add('show'); drawer.setAttribute('aria-hidden', 'false');
   };
-  grid.addEventListener('click', e => { const c = e.target.closest('.product'); if (c) open(c.dataset.id); });
+  grid.addEventListener('click', e => { if (e.target.closest('a[href]')) return; const c = e.target.closest('.product'); if (c) open(c.dataset.id); });
   grid.addEventListener('keydown', e => { if (e.key === 'Enter') { const c = e.target.closest('.product'); if (c) open(c.dataset.id); } });
   drawer.addEventListener('click', e => { if (e.target === drawer || e.target.closest('[data-close]')) drawer.classList.remove('show'); });
   render();

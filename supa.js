@@ -33,7 +33,7 @@ window.loadContent = async function () {
     D.customers = cu.data || [];
     D.testimonials = te.data || [];
     D.installations = (ins.data || []).map(i => ({ ...i, date: i.date || '' }));
-    D.posts = (ar.data || []).map(a => ({ title: a.title, summary: a.summary, date: a.published_at, cover: a.cover, url: 'article.html?slug=' + encodeURIComponent(a.slug) }));
+    D.posts = (ar.data || []).map(a => ({ title: a.title, summary: a.summary, date: a.published_at, cover: a.cover, url: '/articles/' + encodeURIComponent(a.slug) }));
     D.live = true;
   } catch (e) { console.warn('Using offline content', e); }
   return D;
