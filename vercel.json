@@ -3,9 +3,68 @@
     {
       "source": "/.well-known/oauth-protected-resource",
       "headers": [
-        { "key": "Content-Type", "value": "application/json" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/article.html",
+      "has": [
+        {
+          "type": "query",
+          "key": "slug",
+          "value": "(?<slug>.+)"
+        }
+      ],
+      "destination": "/articles/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/baroda",
+      "destination": "/vadodara",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/products",
+      "destination": "/api/seo?page=products"
+    },
+    {
+      "source": "/products/:id",
+      "destination": "/api/seo?page=product&id=:id"
+    },
+    {
+      "source": "/articles",
+      "destination": "/api/seo?page=articles"
+    },
+    {
+      "source": "/articles/:slug",
+      "destination": "/api/seo?page=article&slug=:slug"
+    },
+    {
+      "source": "/:city(ahmedabad|surat|vadodara|india)",
+      "destination": "/api/seo?page=city&city=:city"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/seo?page=sitemap"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/api/seo?page=robots"
+    },
+    {
+      "source": "/llms.txt",
+      "destination": "/api/seo?page=llms"
     }
   ]
 }
