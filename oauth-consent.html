@@ -5,50 +5,121 @@
   <title>MedicoHues – Authorize MCP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 60px auto; padding: 24px; background: #f7f9fc; }
+    body { font-family: system-ui, sans-serif; max-width: 440px; margin: 50px auto; padding: 20px; background: #f7f9fc; }
     .card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
-    h1 { font-size: 1.4rem; margin: 0 0 8px; }
+    h1 { font-size: 1.35rem; margin: 0 0 8px; }
     p { color: #555; font-size: .95rem; }
     label { display: block; margin: 14px 0 4px; font-weight: 500; }
-    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
-    button { width: 100%; margin-top: 18px; padding: 12px; background: #1565c0; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+    button { width: 100%; margin-top: 16px; padding: 12px; background: #1565c0; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+    button.secondary { background: #eee; color: #333; }
     button:disabled { opacity: .6; }
     .err { color: #c62828; margin-top: 10px; font-size: .9rem; }
+    .scopes { background: #f0f4f8; padding: 10px 12px; border-radius: 8px; margin: 12px 0; font-size: .9rem; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Authorize MedicoHues MCP</h1>
-    <p>Sign in with your admin credentials to allow this AI assistant to manage your website content.</p>
-    <form id="f">
+    <p id="intro">Sign in with your admin credentials to allow this AI assistant to manage your website content.</p>
+
+    <form id="login" class="hidden">
       <label>Email</label>
       <input type="email" name="email" required autocomplete="username">
       <label>Password</label>
       <input type="password" name="password" required autocomplete="current-password">
-      <button type="submit">Sign in & Authorize</button>
-      <div class="err" id="err"></div>
+      <button type="submit">Sign in & Continue</button>
+      <div class="err" id="loginErr"></div>
     </form>
+
+    <div id="consent" class="hidden">
+      <p id="clientInfo"></p>
+      <div class="scopes" id="scopes"></div>
+      <button id="approve">Approve</button>
+      <button id="deny" class="secondary">Deny</button>
+      <div class="err" id="consentErr"></div>
+    </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const sb = supabase.createClient('https://oyehwvvpsdpkhpbtoylb.supabase.co', 'sb_publishable_HEY-CuAb3JqyaXmWlzrakg_3CfjZAqD');
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const SUPA_URL = 'https://oyehwvvpsdpkhpbtoylb.supabase.co';
+    const SUPA_ANON = 'sb_publishable_HEY-CuAb3JqyaXmWlzrakg_3CfjZAqD';
+    const sb = createClient(SUPA_URL, SUPA_ANON);
+
     const params = new URLSearchParams(location.search);
-    document.getElementById('f').onsubmit = async (e) => {
+    const authorizationId = params.get('authorization_id');
+
+    const loginForm = document.getElementById('login');
+    const consentBox = document.getElementById('consent');
+    const loginErr = document.getElementById('loginErr');
+    const consentErr = document.getElementById('consentErr');
+
+    async function showConsent() {
+      if (!authorizationId) {
+        consentErr.textContent = 'Missing authorization_id. Start the connection from your AI assistant.';
+        consentBox.classList.remove('hidden');
+        return;
+      }
+      const { data, error } = await sb.auth.oauth.getAuthorizationDetails(authorizationId);
+      if (error) {
+        consentErr.textContent = error.message;
+        consentBox.classList.remove('hidden');
+        return;
+      }
+      if (data.redirect_url) {
+        location.href = data.redirect_url;
+        return;
+      }
+      document.getElementById('clientInfo').textContent = `Allow "${data.client?.name || 'this app'}" to access your MedicoHues content?`;
+      document.getElementById('scopes').textContent = data.scope ? `Scopes: ${data.scope}` : 'Basic access';
+      consentBox.classList.remove('hidden');
+    }
+
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        await showConsent();
+      } else {
+        loginForm.classList.remove('hidden');
+      }
+    }
+
+    loginForm.onsubmit = async (e) => {
       e.preventDefault();
       const btn = e.target.querySelector('button');
       btn.disabled = true;
-      const { data, error } = await sb.auth.signInWithPassword({
+      loginErr.textContent = '';
+      const { error } = await sb.auth.signInWithPassword({
         email: e.target.email.value,
         password: e.target.password.value,
       });
       if (error) {
-        document.getElementById('err').textContent = error.message;
+        loginErr.textContent = error.message;
         btn.disabled = false;
         return;
       }
-      const redirect = params.get('redirect_uri') || '/admin/';
-      location.href = redirect + (redirect.includes('?') ? '&' : '?') + 'mcp_authorized=1';
+      loginForm.classList.add('hidden');
+      await showConsent();
     };
+
+    document.getElementById('approve').onclick = async () => {
+      if (!authorizationId) return;
+      const { data, error } = await sb.auth.oauth.approveAuthorization(authorizationId);
+      if (error) { consentErr.textContent = error.message; return; }
+      if (data?.redirect_url) location.href = data.redirect_url;
+    };
+
+    document.getElementById('deny').onclick = async () => {
+      if (!authorizationId) return;
+      const { data, error } = await sb.auth.oauth.denyAuthorization(authorizationId);
+      if (error) { consentErr.textContent = error.message; return; }
+      if (data?.redirect_url) location.href = data.redirect_url;
+    };
+
+    init();
   </script>
 </body>
 </html>
