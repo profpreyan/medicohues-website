@@ -1,182 +1,115 @@
-// MedicoHues MCP Server
-// Remote MCP endpoint for Claude / ChatGPT / Grok
-// Uses Supabase Auth (same credentials as admin) via OAuth 2.1
+import { createMcpHandler } from "mcp-handler";
+import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 
-import { createClient } from '@supabase/supabase-js';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+const SUPA_URL = process.env.SUPABASE_URL || "https://oyehwvvpsdpkhpbtoylb.supabase.co";
+const SUPA_ANON = process.env.SUPABASE_ANON_KEY || "sb_publishable_HEY-CuAb3JqyaXmWlzrakg_3CfjZAqD";
 
-const SUPA_URL = process.env.SUPABASE_URL || 'https://oyehwvvpsdpkhpbtoylb.supabase.co';
-const SUPA_ANON = process.env.SUPABASE_ANON_KEY || 'sb_publishable_HEY-CuAb3JqyaXmWlzrakg_3CfjZAqD';
-
-const TABLES = {
-  products: { key: 'id', fields: ['name', 'brand', 'speciality', 'category', 'brief', 'details', 'image', 'representative', 'brochure', 'source', 'sort', 'published'] },
-  articles: { key: 'id', fields: ['title', 'summary', 'cover', 'body', 'published_at', 'published', 'slug'] },
-  partners: { key: 'id', fields: ['name', 'chip', 'description', 'origin', 'sub_distributor', 'sort', 'published'] },
-  customers: { key: 'id', fields: ['name', 'sort', 'published'] },
-  testimonials: { key: 'id', fields: ['quote', 'name', 'place', 'sort', 'published'] },
-  installations: { key: 'id', fields: ['title', 'place', 'date', 'image', 'published'] },
-  enquiries: { key: 'id', fields: ['name', 'organisation', 'phone', 'email', 'speciality', 'product', 'message', 'status', 'page'] },
-};
+const TYPES = ["products", "articles", "partners", "customers", "testimonials", "installations", "enquiries"];
 
 function getSb(token) {
   return createClient(SUPA_URL, SUPA_ANON, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-    db: { schema: 'medicohues' },
+    global: token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+    db: { schema: "medicohues" },
   });
 }
 
-async function verifyToken(token) {
-  if (!token) return null;
+async function requireAdmin(token) {
+  if (!token) throw new Error("Missing authorization token");
   const sb = createClient(SUPA_URL, SUPA_ANON);
   const { data: { user }, error } = await sb.auth.getUser(token);
-  if (error || !user) return null;
-  const { data: isAdmin } = await sb.rpc('claim_admin', {}, { headers: { Authorization: `Bearer ${token}` } });
-  if (!isAdmin) return null;
-  return user;
+  if (error || !user) throw new Error("Invalid token");
+  const { data: isAdmin } = await sb.rpc("claim_admin", {}, { headers: { Authorization: `Bearer ${token}` } });
+  if (!isAdmin) throw new Error("Not an admin");
+  return getSb(token);
 }
 
-const server = new Server(
-  { name: 'medicohues-mcp', version: '1.0.0' },
-  { capabilities: { tools: {} } }
+const handler = createMcpHandler(
+  (server) => {
+    server.tool(
+      "list_items",
+      "List items of a content type (products, articles, partners, customers, testimonials, installations, enquiries)",
+      {
+        type: z.enum(TYPES),
+        published: z.boolean().optional(),
+        limit: z.number().int().min(1).max(200).optional().default(50),
+        search: z.string().optional(),
+      },
+      async ({ type, published, limit, search }, extra) => {
+        const token = extra?.authInfo?.token;
+        const sb = await requireAdmin(token);
+        let q = sb.from(type).select("*").limit(limit || 50);
+        if (published !== undefined) q = q.eq("published", published);
+        if (search) q = q.or(`name.ilike.%${search}%,title.ilike.%${search}%`);
+        const { data, error } = await q;
+        if (error) throw new Error(error.message);
+        return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+      }
+    );
+
+    server.tool(
+      "get_item",
+      "Get one item by type and id",
+      { type: z.enum(TYPES), id: z.string() },
+      async ({ type, id }, extra) => {
+        const sb = await requireAdmin(extra?.authInfo?.token);
+        const { data, error } = await sb.from(type).select("*").eq("id", id).single();
+        if (error) throw new Error(error.message);
+        return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+      }
+    );
+
+    server.tool(
+      "create_item",
+      "Create a new item. Pass the fields for that content type.",
+      { type: z.enum(TYPES), data: z.record(z.any()) },
+      async ({ type, data }, extra) => {
+        const sb = await requireAdmin(extra?.authInfo?.token);
+        const { data: created, error } = await sb.from(type).insert(data).select().single();
+        if (error) throw new Error(error.message);
+        return { content: [{ type: "text", text: JSON.stringify(created, null, 2) }] };
+      }
+    );
+
+    server.tool(
+      "update_item",
+      "Update an existing item",
+      { type: z.enum(TYPES), id: z.string(), data: z.record(z.any()) },
+      async ({ type, id, data }, extra) => {
+        const sb = await requireAdmin(extra?.authInfo?.token);
+        const { data: updated, error } = await sb.from(type).update(data).eq("id", id).select().single();
+        if (error) throw new Error(error.message);
+        return { content: [{ type: "text", text: JSON.stringify(updated, null, 2) }] };
+      }
+    );
+
+    server.tool(
+      "delete_item",
+      "Delete an item by type and id",
+      { type: z.enum(TYPES), id: z.string() },
+      async ({ type, id }, extra) => {
+        const sb = await requireAdmin(extra?.authInfo?.token);
+        const { error } = await sb.from(type).delete().eq("id", id);
+        if (error) throw new Error(error.message);
+        return { content: [{ type: "text", text: "Deleted successfully" }] };
+      }
+    );
+
+    server.tool(
+      "whoami",
+      "Show the currently authenticated admin",
+      {},
+      async (_args, extra) => {
+        const token = extra?.authInfo?.token;
+        if (!token) return { content: [{ type: "text", text: "Not authenticated" }] };
+        const sb = createClient(SUPA_URL, SUPA_ANON);
+        const { data: { user } } = await sb.auth.getUser(token);
+        return { content: [{ type: "text", text: JSON.stringify({ email: user?.email, id: user?.id }) }] };
+      }
+    );
+  },
+  {},
+  { basePath: "/api", maxDuration: 60 }
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [
-    {
-      name: 'list_items',
-      description: 'List items of a given type (products, articles, partners, customers, testimonials, installations, enquiries). Supports filters and published status.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: Object.keys(TABLES) },
-          published: { type: 'boolean' },
-          limit: { type: 'number', default: 50 },
-          search: { type: 'string' },
-        },
-        required: ['type'],
-      },
-    },
-    {
-      name: 'get_item',
-      description: 'Get a single item by type and id.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: Object.keys(TABLES) },
-          id: { type: 'string' },
-        },
-        required: ['type', 'id'],
-      },
-    },
-    {
-      name: 'create_item',
-      description: 'Create a new item of the given type.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: Object.keys(TABLES) },
-          data: { type: 'object' },
-        },
-        required: ['type', 'data'],
-      },
-    },
-    {
-      name: 'update_item',
-      description: 'Update an existing item.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: Object.keys(TABLES) },
-          id: { type: 'string' },
-          data: { type: 'object' },
-        },
-        required: ['type', 'id', 'data'],
-      },
-    },
-    {
-      name: 'delete_item',
-      description: 'Delete an item by type and id.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: Object.keys(TABLES) },
-          id: { type: 'string' },
-        },
-        required: ['type', 'id'],
-      },
-    },
-    {
-      name: 'whoami',
-      description: 'Return the currently authenticated admin user.',
-      inputSchema: { type: 'object', properties: {} },
-    },
-  ],
-}));
-
-server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
-  const token = extra?.authInfo?.token || request.params?.arguments?._token;
-  const user = await verifyToken(token);
-  if (!user) {
-    return { content: [{ type: 'text', text: 'Unauthorized. Please sign in with your MedicoHues admin credentials.' }], isError: true };
-  }
-  const sb = getSb(token);
-  const { name, arguments: args } = request.params;
-
-  try {
-    if (name === 'whoami') {
-      return { content: [{ type: 'text', text: JSON.stringify({ email: user.email, id: user.id }) }] };
-    }
-    const type = args.type;
-    const table = TABLES[type];
-    if (!table) throw new Error('Unknown type');
-
-    if (name === 'list_items') {
-      let q = sb.from(type).select('*').order(table.key === 'id' ? 'created_at' : 'sort', { ascending: false }).limit(args.limit || 50);
-      if (args.published !== undefined) q = q.eq('published', args.published);
-      if (args.search) q = q.or(`name.ilike.%${args.search}%,title.ilike.%${args.search}%`);
-      const { data, error } = await q;
-      if (error) throw error;
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
-    }
-    if (name === 'get_item') {
-      const { data, error } = await sb.from(type).select('*').eq(table.key, args.id).single();
-      if (error) throw error;
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
-    }
-    if (name === 'create_item') {
-      const { data, error } = await sb.from(type).insert(args.data).select().single();
-      if (error) throw error;
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
-    }
-    if (name === 'update_item') {
-      const { data, error } = await sb.from(type).update(args.data).eq(table.key, args.id).select().single();
-      if (error) throw error;
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
-    }
-    if (name === 'delete_item') {
-      const { error } = await sb.from(type).delete().eq(table.key, args.id);
-      if (error) throw error;
-      return { content: [{ type: 'text', text: 'Deleted successfully' }] };
-    }
-    throw new Error('Unknown tool');
-  } catch (e) {
-    return { content: [{ type: 'text', text: `Error: ${e.message}` }], isError: true };
-  }
-});
-
-export default async function handler(req, res) {
-  if (req.url?.includes('.well-known/oauth-protected-resource')) {
-    return res.status(200).json({
-      resource: 'https://medicohues-website.vercel.app/api/mcp',
-      authorization_servers: ['https://oyehwvvpsdpkhpbtoylb.supabase.co/auth/v1'],
-      scopes_supported: ['openid', 'email', 'profile'],
-      bearer_methods_supported: ['header'],
-    });
-  }
-
-  const transport = new StreamableHTTPServerTransport('/api/mcp', res);
-  await server.connect(transport);
-  await transport.handleRequest(req, res);
-}
+export { handler as GET, handler as POST };
