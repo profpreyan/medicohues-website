@@ -16,6 +16,17 @@
   ],
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "medicohues.com"
+        }
+      ],
+      "destination": "https://www.medicohues.com/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {
