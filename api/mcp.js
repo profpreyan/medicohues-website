@@ -19,15 +19,13 @@ function getSb(token) {
 async function verifyToken(req, bearerToken) {
   if (!bearerToken) return undefined;
   try {
-    const sb = createClient(SUPA_URL, SUPA_ANON, {
-      db: { schema: "medicohues" },
-    });
+    const sb = getSb(bearerToken);
     const { data: { user }, error } = await sb.auth.getUser(bearerToken);
     if (error || !user) {
       console.error("MCP auth getUser failed:", error?.message || "no user");
       return undefined;
     }
-    const { data: isAdmin, error: rpcError } = await sb.rpc("claim_admin", {}, { headers: { Authorization: `Bearer ${bearerToken}` } });
+    const { data: isAdmin, error: rpcError } = await sb.rpc("claim_admin");
     if (rpcError) {
       console.error("MCP auth claim_admin rpc failed:", rpcError.message);
       return undefined;
@@ -42,7 +40,8 @@ async function verifyToken(req, bearerToken) {
       clientId: user.id,
       extra: { email: user.email, userId: user.id },
     };
-  } catch {
+  } catch (err) {
+    console.error("MCP auth unexpected error:", err?.message || err);
     return undefined;
   }
 }
